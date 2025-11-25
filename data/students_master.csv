@@ -1,0 +1,11 @@
+student_id,name,email,phone,class_id,admission_year,degree
+STU0001,Aarav Kumar,aarav.kumar@example.com,9876543210,CSE-A-2025,2021,B.Tech
+STU0002,Isha Sharma,isha.sharma@example.com,9876543211,CSE-A-2025,2021,B.Tech
+STU0003,Rohan Verma,rohan.verma@example.com,9876543212,CSE-B-2025,2021,B.Tech
+STU0004,Neha Singh,neha.singh@example.com,9876543213,ECE-A-2025,2021,B.Tech
+STU0005,Karan Patel,karan.patel@example.com,9876543214,ECE-A-2025,2021,B.Tech
+STU0006,Priya Rao,priya.rao@example.com,9876543215,MECH-A-2025,2021,B.Tech
+STU0007,Vikram Das,vikram.das@example.com,9876543216,MECH-A-2025,2021,B.Tech
+STU0008,Ananya Nair,ananya.nair@example.com,9876543217,CSE-A-2026,2022,B.Tech
+STU0009,Rahul Jain,rahul.jain@example.com,9876543218,CSE-A-2026,2022,B.Tech
+STU0010,Sneha Iyer,sneha.iyer@example.com,9876543219,ECE-B-2025,2021,B.Tech

@@ -1,0 +1,10 @@
+student_id,name,email,company_or_organizer,event_type,event_date,result,lpa,attendance_status
+STU0001,Aarav Kumar,aarav.kumar@example.com,TCS,Placement,2025-01-10,Selected,7.5,Present
+STU0002,Isha Sharma,isha.sharma@example.com,Infosys,Placement,2025-01-12,Not Selected,,Present
+STU0003,Rohan Verma,rohan.verma@example.com,Wipro,Internship,2025-02-05,Selected,0.0,Present
+STU0004,Neha Singh,neha.singh@example.com,HCL,Training,2025-02-20,Completed,,Present
+,Karan Patel,karan.patel@example.com,TCS,Placement,2025-03-01,Selected,6.0,Present
+,Priya Rao,priya.rao@example.com,Infosys,Internship,2025-03-05,Selected,0.0,Present
+STU9999,Vikram Das,wrong.email@example.com,Amazon,Placement,2025-03-10,Selected,12.0,Present
+,Rahul Jain,rahul.jain@example.com,TCS,Training,2025-03-15,Completed,,Present
+,Random Student,random.student@example.com,Google,Placement,2025-03-20,Selected,20.0,Present
