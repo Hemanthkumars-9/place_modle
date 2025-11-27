@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware 
 import pandas as pd
 import io
 
@@ -9,11 +10,22 @@ from app.class_summary import (
     generate_attendance_log_from_df,
     save_attendance_log,
     load_attendance_log,
-    resolve_match,   # 👈 add this
+    resolve_match,   
 )
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/api/class_summary/{class_id}")
