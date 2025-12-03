@@ -1,6 +1,7 @@
-import os
+from pathlib import Path
 import uuid
 import pandas as pd
+
 from app.matching import (
     load_students,
     load_events,
@@ -9,7 +10,14 @@ from app.matching import (
     make_fingerprint,
 )
 
-LOG_PATH = "data/attendance_log.csv"
+# Base dir = project root (place_modle)
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+DATA_DIR.mkdir(exist_ok=True)
+
+LOG_PATH = DATA_DIR / "attendance_log.csv"
+
+
 
 
 def generate_attendance_log_from_df(events_df: pd.DataFrame) -> pd.DataFrame:
@@ -70,7 +78,7 @@ def save_attendance_log(new_log_df: pd.DataFrame) -> None:
     if new_log_df is None or new_log_df.empty:
         return
 
-    if os.path.exists(LOG_PATH):
+    if LOG_PATH.exists():
         old_df = pd.read_csv(LOG_PATH)
         combined = pd.concat([old_df, new_log_df], ignore_index=True)
     else:
@@ -83,36 +91,40 @@ def save_attendance_log(new_log_df: pd.DataFrame) -> None:
 
     combined.to_csv(LOG_PATH, index=False)
 
-
 def load_attendance_log() -> pd.DataFrame:
     """
     Load the persistent attendance log.
     If it doesn't exist yet, bootstrap it from event_upload.csv.
     """
-    if os.path.exists(LOG_PATH):
-        return pd.read_csv(LOG_PATH)
+    if LOG_PATH.exists():
+        df = pd.read_csv(LOG_PATH)
+        df.columns = [c.strip().lower() for c in df.columns]
+        return df
 
     # bootstrap from the default CSV once
     base_log = generate_attendance_log()
     if not base_log.empty:
         base_log.to_csv(LOG_PATH, index=False)
+    base_log.columns = [c.strip().lower() for c in base_log.columns]
     return base_log
+
 
 
 def get_class_summary(class_id: str):
     log = load_attendance_log()
     students_df = load_students()
 
+    # total students in this class from master
     total = students_df[students_df["class_id"] == class_id].shape[0]
 
-    if log.empty:
-        placed_unique = internship_unique = training_unique = 0
-    else:
+    placed_unique = internship_unique = training_unique = 0
+    avg_lpa_placed = None
+    company_breakdown = {}
+
+    if log is not None and not log.empty:
         data = log[log["class_id"] == class_id]
 
-        if data.empty:
-            placed_unique = internship_unique = training_unique = 0
-        else:
+        if not data.empty:
             etype = data["event_type"].astype(str).str.lower()
             result = data["result"].astype(str).str.lower()
 
@@ -124,6 +136,32 @@ def get_class_summary(class_id: str):
             internship_unique = internship["student_id"].nunique()
             training_unique = training["student_id"].nunique()
 
+            # ---- Avg LPA of placed ----
+            if "lpa" in placed.columns:
+                try:
+                    lpa_series = pd.to_numeric(placed["lpa"], errors="coerce")
+                    if lpa_series.notna().any():
+                        avg_lpa_placed = float(lpa_series.mean())
+                    else:
+                        avg_lpa_placed = None
+                except Exception:
+                    avg_lpa_placed = None
+
+            # ---- Company-wise breakdown (unique placed students per company) ----
+            if "company" in placed.columns and "student_id" in placed.columns:
+                company_counts = (
+                    placed.assign(
+                        company=placed["company"].astype(str).str.strip()
+                    )
+                    .groupby("company")["student_id"]
+                    .nunique()
+                    .to_dict()
+                )
+                # remove empty company keys like ""
+                company_breakdown = {
+                    k: int(v) for k, v in company_counts.items() if k
+                }
+
     summary = {
         "class_id": class_id,
         "total_students": int(total),
@@ -131,9 +169,12 @@ def get_class_summary(class_id: str):
         "internship_count": int(internship_unique),
         "trained_count": int(training_unique),
         "not_placed_count": int(max(total - placed_unique, 0)),
+        "avg_lpa_placed": avg_lpa_placed,         # float or null
+        "company_breakdown": company_breakdown,   # { company: count }
     }
 
     return summary
+
 def resolve_match(attendance_id: str, new_student_id: str) -> dict:
     """
     Manually resolve an unmatched (or wrong) row by assigning a student_id.
